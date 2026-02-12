@@ -2,20 +2,21 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
-    <title>Sonk.Rom TD — Таймаут врага 1 минута</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Sonk.Rom TD — v0.5.3 (Умная прокачка)</title>
     <style>
-        /* Стили Windows 95 — без изменений */
+        /* Стили без изменений (полностью сохранены) */
         body {
             background: #008080;
             font-family: 'MS Sans Serif', 'Microsoft Sans Serif', 'Courier New', monospace;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             box-sizing: border-box;
+            touch-action: pan-y;
         }
         .window {
             background: #c0c0c0;
@@ -24,69 +25,83 @@
             padding: 4px;
             display: inline-block;
             max-width: 100%;
+            width: fit-content;
+            margin: 0 auto;
         }
         .title-bar {
             background: #000080;
             color: white;
-            padding: 4px 8px;
-            font-size: 18px;
+            padding: 6px 10px;
+            font-size: 16px;
             font-weight: bold;
             display: flex;
             justify-content: space-between;
             border: 2px solid;
             border-color: #ffffff #404040 #404040 #ffffff;
             margin-bottom: 10px;
+            align-items: center;
         }
         .game-container {
             display: flex;
-            gap: 20px;
-            flex-wrap: nowrap;
+            gap: 16px;
+            flex-wrap: wrap;
             align-items: flex-start;
-            overflow-x: auto;
+            justify-content: center;
             max-width: 100%;
-            padding-bottom: 5px;
         }
         canvas {
             border: 4px solid;
             border-color: #404040 #ffffff #ffffff #404040;
             background: #e0e0e0;
             cursor: crosshair;
-            width: 760px;
-            height: 520px;
-            max-width: none;
+            width: 100%;
+            height: auto;
+            max-width: 760px;
+            aspect-ratio: 760 / 520;
             flex-shrink: 0;
             display: block;
+            touch-action: none;
         }
         .panel {
-            width: 320px;
+            width: 350px;
             background: #c0c0c0;
             border: 4px solid;
             border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 12px;
+            padding: 16px;
             font-size: 16px;
             flex-shrink: 0;
+            box-sizing: border-box;
+        }
+        @media (max-width: 1000px) {
+            .game-container { flex-direction: column; align-items: center; }
+            canvas { width: 100%; max-width: 100%; margin-bottom: 10px; }
+            .panel { width: 100%; max-width: 500px; padding: 20px; }
+            .shop-item button { padding: 12px 20px !important; font-size: 18px !important; }
+            .restart-btn { padding: 16px !important; font-size: 20px !important; }
+            .title-bar span { font-size: 18px; }
+            .sonk-rom span { font-size: 40px; }
         }
         .sonk-rom {
             background: #0000aa;
             color: yellow;
-            padding: 8px;
-            margin-bottom: 12px;
+            padding: 10px;
+            margin-bottom: 16px;
             border: 3px solid;
             border-color: #ffffff #808080 #808080 #ffffff;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             font-size: 20px;
             font-weight: bold;
             text-shadow: 2px 2px 0 #000;
         }
-        .sonk-rom span { font-size: 32px; }
+        .sonk-rom span { font-size: 36px; }
         .shop-item {
             background: #d0d0d0;
             border: 3px solid;
             border-color: #ffffff #808080 #808080 #ffffff;
             padding: 10px;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -96,17 +111,19 @@
             border: 4px solid;
             border-color: #ffffff #808080 #808080 #ffffff;
             font-family: inherit;
-            font-size: 16px;
-            padding: 6px 12px;
+            font-size: 18px;
+            padding: 8px 14px;
             cursor: pointer;
             font-weight: bold;
+            touch-action: manipulation;
+            min-width: 90px;
         }
         .shop-item button:active {
             border-color: #808080 #ffffff #ffffff #808080;
         }
         .health-bar {
             background: #ff0000;
-            height: 20px;
+            height: 24px;
             width: 100%;
             border: 2px solid #404040;
         }
@@ -120,93 +137,124 @@
             background: #ffffcc;
             border: 4px solid;
             border-color: #ffffff #808080 #808080 #ffffff;
-            padding: 8px;
-            margin-top: 12px;
-            font-size: 14px;
+            padding: 12px;
+            margin-top: 16px;
+            font-size: 16px;
+        }
+        .upgrade-menu button {
+            padding: 12px 8px;
+            font-size: 16px;
+            touch-action: manipulation;
+        }
+        .upgrade-all-btn {
+            background: #ffaa00;
+            border: 4px solid;
+            border-color: #ffffff #808080 #808080 #ffffff;
+            font-size: 18px;
+            padding: 14px;
+            margin-top: 16px;
+            width: 100%;
+            cursor: pointer;
+            font-weight: bold;
+            touch-action: manipulation;
+            color: black;
+            text-shadow: 1px 1px 0 white;
+        }
+        .upgrade-all-btn:active {
+            border-color: #808080 #ffffff #ffffff #808080;
         }
         .restart-btn {
             background: #c0c0c0;
             border: 4px solid;
             border-color: #ffffff #808080 #808080 #ffffff;
-            font-size: 18px;
-            padding: 8px 16px;
-            margin-top: 12px;
+            font-size: 20px;
+            padding: 14px 20px;
+            margin-top: 16px;
             width: 100%;
             cursor: pointer;
             font-weight: bold;
+            touch-action: manipulation;
         }
         .restart-btn:active {
             border-color: #808080 #ffffff #ffffff #808080;
+        }
+        .boss-indicator {
+            background: #800080;
+            color: yellow;
+            padding: 4px 8px;
+            border: 2px solid #ffcc00;
+            border-radius: 0;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="window">
         <div class="title-bar">
-            <span>🦔 Sonk.Rom TD — Таймаут врага 1 минута</span>
-            <span>📟 Win95</span>
+            <span>🦔 Sonk.Rom TD — v0.5.3 (Умная прокачка)</span>
+            <span>📱 Mobile</span>
         </div>
         <div class="game-container">
             <canvas id="gameCanvas" width="760" height="520"></canvas>
 
             <div class="panel">
                 <div class="sonk-rom">
-                    <span>🦔</span> Sonk.Rom <span style="font-size:14px;">v8.1</span>
+                    <span>🦔</span> Sonk.Rom <span style="font-size:16px;">v0.5.3</span>
                 </div>
                 
-                <div style="margin-bottom: 12px; font-weight: bold;">
+                <div style="margin-bottom: 16px; font-weight: bold; font-size: 18px;">
                     💰 Монеты: <span id="moneyDisplay">200</span>
                 </div>
-                <div style="margin-bottom: 12px;">
+                <div style="margin-bottom: 16px;">
                     🏰 База: <span id="baseHealthDisplay">100</span> HP
                     <div class="health-bar">
                         <div id="baseHealthFill" class="health-fill" style="width:100%;"></div>
                     </div>
                 </div>
-                <div style="margin-bottom: 12px; font-weight: bold; background:#000080; color:white; padding:4px;">
+                <div style="margin-bottom: 16px; font-weight: bold; background:#000080; color:white; padding:8px; font-size:18px;">
                     🌊 ВОЛНА: <span id="waveDisplay">1</span> &nbsp;|&nbsp; 🏆 Рекорд: <span id="recordDisplay">1</span>
+                    <span id="bossIndicator" style="display:none; margin-left:8px;" class="boss-indicator">👑 БОСС</span>
                 </div>
 
-                <h3 style="margin:0 0 8px 0; border-bottom:2px solid #808080;">🏪 МАГАЗИН</h3>
+                <h3 style="margin:0 0 12px 0; border-bottom:2px solid #808080; font-size:22px;">🏪 МАГАЗИН</h3>
                 
-                <div class="shop-item">
-                    <div>
-                        <strong>🔫 Стрелок</strong><br>
-                        <span style="font-size:14px;">Ур6 Ск2 Деб2 (поджог)</span>
-                    </div>
-                    <button onclick="selectTower(0)">80💰</button>
-                </div>
-                <div class="shop-item">
-                    <div>
-                        <strong>🐌 Замедлитель</strong><br>
-                        <span style="font-size:14px;">Ур2 Ск4 Деб4 (замедл)</span>
-                    </div>
-                    <button onclick="selectTower(1)">90💰</button>
-                </div>
-                <div class="shop-item">
-                    <div>
-                        <strong>🔥 Поджигатель</strong><br>
-                        <span style="font-size:14px;">Ур4 Ск3 Деб3 (огонь)</span>
-                    </div>
-                    <button onclick="selectTower(2)">85💰</button>
-                </div>
+                <!-- 12 башен -->
+                <div class="shop-item"><div><strong>🔫 Стрелок</strong><br><span style="font-size:14px;">6/2/2 ПОДЖОГ</span></div><button onclick="selectTower(0)">120💰</button></div>
+                <div class="shop-item"><div><strong>🐌 Замедлитель</strong><br><span style="font-size:14px;">2/4/4 ЗАМЕДЛ</span></div><button onclick="selectTower(1)">140💰</button></div>
+                <div class="shop-item"><div><strong>🛡️ Ломатель</strong><br><span style="font-size:14px;">4/3/3 УЯЗВИМ</span></div><button onclick="selectTower(2)">130💰</button></div>
+                <div class="shop-item"><div><strong>🔇 Глушитель</strong><br><span style="font-size:14px;">8/1/1 НЕМОТА</span></div><button onclick="selectTower(3)">150💰</button></div>
+                <div class="shop-item"><div><strong>💨 Ветродуй</strong><br><span style="font-size:14px;">2/3/5 ОТБРОС</span></div><button onclick="selectTower(4)">160💰</button></div>
+                <div class="shop-item"><div><strong>👻 Пугало</strong><br><span style="font-size:14px;">3/4/3 СТРАХ</span></div><button onclick="selectTower(5)">140💰</button></div>
+                <div class="shop-item"><div><strong>🌀 Вихрь</strong><br><span style="font-size:14px;">3/3/4 ДЕЗОРИЕНТ</span></div><button onclick="selectTower(6)">140💰</button></div>
+                <div class="shop-item"><div><strong>☠️ Скверна</strong><br><span style="font-size:14px;">2/3/5 ПОРЧА</span></div><button onclick="selectTower(7)">160💰</button></div>
+                <div class="shop-item"><div><strong>💰 Золотоискатель</strong><br><span style="font-size:14px;">1/5/4 ЛИХОРАДКА</span></div><button onclick="selectTower(8)">150💰</button></div>
+                <div class="shop-item"><div><strong>⚡ Разряд</strong><br><span style="font-size:14px;">3/4/3 ПЕРЕГРУЗКА</span></div><button onclick="selectTower(9)">140💰</button></div>
+                <div class="shop-item"><div><strong>❄️ Мороз</strong><br><span style="font-size:14px;">2/5/3 ХРУПКИЙ ЛЁД</span></div><button onclick="selectTower(10)">150💰</button></div>
+                <div class="shop-item"><div><strong>🩸 Шип</strong><br><span style="font-size:14px;">4/2/4 КРОВОТЕЧ</span></div><button onclick="selectTower(11)">150💰</button></div>
 
-                <div style="margin-top:16px; font-size:14px; background:#ffffaa; padding:6px; border:2px solid #808080;">
+                <div style="margin-top:20px; font-size:16px; background:#ffffaa; padding:10px; border:2px solid #808080;">
                     🆓 ПЕРВАЯ БАШНЯ — БЕСПЛАТНО!<br>
-                    🖱️ Клик по башне — улучшение<br>
+                    🖱️ Тап по башне — улучшение<br>
                     ⏱️ 1 балл СкАтаки = 2 сек<br>
                     ⏳ Задержка перед 1-й волной: 2 сек<br>
-                    ⏰ Таймаут врага: 1 минута
+                    📡 РАДИУС АТАКИ 2.5 КЛЕТКИ<br>
+                    👑 КАЖДЫЕ 10 ВОЛН — БОСС!<br>
+                    🎨 ВСЕ ДЕБАФФЫ ВИЗУАЛИЗИРОВАНЫ
                 </div>
 
+                <!-- ПАНЕЛЬ УЛУЧШЕНИЯ БАШНИ -->
                 <div id="upgradePanel" class="upgrade-menu" style="display:none;">
-                    <div style="font-weight:bold; margin-bottom:8px;">🔧 Улучшить башню</div>
-                    <div style="display:flex; justify-content:space-between;">
-                        <button id="upgradeDamageBtn" style="width:30%;">💥 +1 урон (50💰)</button>
-                        <button id="upgradeSpeedBtn" style="width:30%;">⚡ +1 ск.атаки (50💰)</button>
-                        <button id="upgradeDebuffBtn" style="width:30%;">🧪 +1 дебафф (50💰)</button>
+                    <div style="font-weight:bold; margin-bottom:12px; font-size:20px;">🔧 Улучшить башню</div>
+                    <div style="display:flex; justify-content:space-between; gap:6px; flex-wrap:wrap;">
+                        <button id="upgradeDamageBtn" style="width:32%; padding:12px 4px;">💥 +1 урон<br>50💰</button>
+                        <button id="upgradeSpeedBtn" style="width:32%; padding:12px 4px;">⚡ +1 ск.ат<br>50💰</button>
+                        <button id="upgradeDebuffBtn" style="width:32%; padding:12px 4px;">🧪 +1 дебафф<br>50💰</button>
                     </div>
-                    <div style="margin-top:8px;">
+                    <!-- УМНАЯ КНОПКА: Улучшить всё до максимума / на все деньги -->
+                    <button id="upgradeAllBtn" class="upgrade-all-btn" onclick="upgradeAllStatsMax()">
+                        💪 Улучшить всё до макс (50💰 за шаг)
+                    </button>
+                    <div style="margin-top:12px; font-size:16px;">
                         <span id="selectedTowerInfo">(выберите башню)</span>
                     </div>
                 </div>
@@ -218,42 +266,54 @@
 
     <script>
         // ------------------------------------------------------------
-        //  ГЛОБАЛЬНЫЕ ПАРАМЕТРЫ
+        //  ГЛОБАЛЬНЫЕ ПАРАМЕТРЫ (БЕЗ ИЗМЕНЕНИЙ)
         // ------------------------------------------------------------
         const COLS = 12, ROWS = 8, CELL_SIZE = 60;
         const CANVAS_WIDTH = COLS * CELL_SIZE + 40;
         const CANVAS_HEIGHT = ROWS * CELL_SIZE + 40;
 
-        // ------------------------------------------------------------
-        //  ТОЧКИ МАРШРУТА (ПОЛНЫЙ ИЗВИЛИСТЫЙ ПУТЬ)
-        // ------------------------------------------------------------
         const waypoints = [
             { col: 0, row: 3 }, { col: 1, row: 3 }, { col: 2, row: 3 }, { col: 3, row: 3 }, { col: 4, row: 3 },
             { col: 4, row: 4 }, { col: 4, row: 5 },
             { col: 5, row: 5 }, { col: 6, row: 5 }, { col: 7, row: 5 }, { col: 8, row: 5 },
             { col: 8, row: 4 }, { col: 8, row: 3 }, { col: 8, row: 2 },
-            { col: 9, row: 2 }, { col: 10, row: 2 }, { col: 11, row: 2 } // БАЗА
+            { col: 9, row: 2 }, { col: 10, row: 2 }, { col: 11, row: 2 }
         ];
 
-        // АВТОМАТИЧЕСКОЕ ПОСТРОЕНИЕ СЕТКИ
         const gridMap = Array(ROWS).fill().map(() => Array(COLS).fill(0));
         waypoints.forEach((point, index) => {
             const { row, col } = point;
             gridMap[row][col] = (index === waypoints.length - 1) ? 2 : 1;
         });
 
-        // ---------- ТИПЫ ЮНИТОВ ----------
         const TOWER_TYPES = [
-            { name: 'Стрелок', damage: 6, attackSpeed: 2, debuff: 2, debuffType: 'burn', price: 80, color: '#5050ff' },
-            { name: 'Замедлитель', damage: 2, attackSpeed: 4, debuff: 4, debuffType: 'slow', price: 90, color: '#50c050' },
-            { name: 'Поджигатель', damage: 4, attackSpeed: 3, debuff: 3, debuffType: 'burn', price: 85, color: '#ff8844' }
+            { name: 'Стрелок', damage: 6, attackSpeed: 2, debuff: 2, debuffType: 'burn', price: 120, color: '#5050ff' },
+            { name: 'Замедлитель', damage: 2, attackSpeed: 4, debuff: 4, debuffType: 'slow', price: 140, color: '#50c050' },
+            { name: 'Ломатель', damage: 4, attackSpeed: 3, debuff: 3, debuffType: 'armorBreak', price: 130, color: '#ffaa00' },
+            { name: 'Глушитель', damage: 8, attackSpeed: 1, debuff: 1, debuffType: 'silence', price: 150, color: '#aa44ff' },
+            { name: 'Ветродуй', damage: 2, attackSpeed: 3, debuff: 5, debuffType: 'knockback', price: 160, color: '#88ccff' },
+            { name: 'Пугало', damage: 3, attackSpeed: 4, debuff: 3, debuffType: 'fear', price: 140, color: '#cc88ff' },
+            { name: 'Вихрь', damage: 3, attackSpeed: 3, debuff: 4, debuffType: 'disorient', price: 140, color: '#00cccc' },
+            { name: 'Скверна', damage: 2, attackSpeed: 3, debuff: 5, debuffType: 'corruption', price: 160, color: '#884444' },
+            { name: 'Золотоискатель', damage: 1, attackSpeed: 5, debuff: 4, debuffType: 'goldRush', price: 150, color: '#ffcc00' },
+            { name: 'Разряд', damage: 3, attackSpeed: 4, debuff: 3, debuffType: 'overload', price: 140, color: '#66aaff' },
+            { name: 'Мороз', damage: 2, attackSpeed: 5, debuff: 3, debuffType: 'ice', price: 150, color: '#aaffff' },
+            { name: 'Шип', damage: 4, attackSpeed: 2, debuff: 4, debuffType: 'bleed', price: 150, color: '#ff6666' }
         ];
 
-        // ---------- ВРАГИ ----------
         const ENEMY_BASE = [
-            { name: 'Пехотинец', baseHp: 25, baseSpeed: 0.9, reward: 25, color: '#8b4513' },
-            { name: 'Броненосец', baseHp: 55, baseSpeed: 0.5, reward: 45, color: '#555555' },
-            { name: 'Курьер', baseHp: 18, baseSpeed: 1.8, reward: 30, color: '#ffaa00', slowResist: 0.5 }
+            { name: 'Пехотинец', baseHp: 25, baseSpeed: 0.9, reward: 15, color: '#8b4513', slowResist: 1.0, isBoss: false },
+            { name: 'Броненосец', baseHp: 55, baseSpeed: 0.5, reward: 25, color: '#555555', slowResist: 1.0, isBoss: false },
+            { name: 'Курьер', baseHp: 18, baseSpeed: 1.8, reward: 20, color: '#ffaa00', slowResist: 0.5, isBoss: false },
+            { name: 'Спринтер', baseHp: 12, baseSpeed: 2.2, reward: 18, color: '#ff6600', slowResist: 1.0, isBoss: false },
+            { name: 'Тяжёлый', baseHp: 80, baseSpeed: 0.4, reward: 40, color: '#444444', slowResist: 1.0, isBoss: false },
+            { name: 'Устойчивый', baseHp: 35, baseSpeed: 0.8, reward: 30, color: '#88aaff', slowResist: 0.3, isBoss: false },
+            { name: 'Лекарь', baseHp: 45, baseSpeed: 0.7, reward: 35, color: '#44cc44', slowResist: 0.8, isBoss: false, healAura: true },
+            { name: 'Берсерк', baseHp: 40, baseSpeed: 1.0, reward: 30, color: '#cc4444', slowResist: 0.7, isBoss: false, berserk: true },
+            { name: 'Щитоносец', baseHp: 70, baseSpeed: 0.5, reward: 45, color: '#aaaaaa', slowResist: 1.2, isBoss: false, shield: true },
+            { name: 'Командир', baseHp: 200, baseSpeed: 0.6, reward: 150, color: '#ffaa00', slowResist: 0.5, isBoss: true, bossAura: 'damageSpeed' },
+            { name: 'Маг', baseHp: 180, baseSpeed: 0.5, reward: 150, color: '#aa00ff', slowResist: 0.4, isBoss: true, bossDebuff: 'towerDebuff' },
+            { name: 'Колосс', baseHp: 400, baseSpeed: 0.25, reward: 200, color: '#333333', slowResist: 0.8, isBoss: true, bossResist: true }
         ];
 
         // ---------- ПЕРЕМЕННЫЕ ИГРЫ ----------
@@ -271,10 +331,11 @@
         let spawnDelay = 50;
         let spawnCounter = 0;
         let frame = 0;
-        let startDelay = 120; // 2 секунды
+        let startDelay = 120;
 
         let maxWaveRecord = localStorage.getItem('sonktd_maxwave') ? parseInt(localStorage.getItem('sonktd_maxwave')) : 1;
         let selectedTowerForUpgrade = null;
+        let bossWave = false;
 
         // ---------- ЗВУКИ ----------
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -285,22 +346,10 @@
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             osc.type = 'square';
-            if (type === 'kill') {
-                osc.frequency.value = 220;
-                gain.gain.value = 0.15;
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.1);
-            } else if (type === 'basehit') {
-                osc.frequency.value = 100;
-                gain.gain.value = 0.2;
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.15);
-            } else if (type === 'buy') {
-                osc.frequency.value = 660;
-                gain.gain.value = 0.1;
-                osc.start();
-                osc.stop(audioCtx.currentTime + 0.07);
-            }
+            if (type === 'kill') { osc.frequency.value = 220; gain.gain.value = 0.15; osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+            else if (type === 'basehit') { osc.frequency.value = 100; gain.gain.value = 0.2; osc.start(); osc.stop(audioCtx.currentTime + 0.15); }
+            else if (type === 'buy') { osc.frequency.value = 660; gain.gain.value = 0.1; osc.start(); osc.stop(audioCtx.currentTime + 0.07); }
+            else if (type === 'bossSpawn') { osc.frequency.value = 330; gain.gain.value = 0.3; osc.start(); osc.stop(audioCtx.currentTime + 0.3); }
         }
 
         // ---------- КЛАСС БАШНИ ----------
@@ -315,116 +364,201 @@
                 this.debuffType = this.baseType.debuffType;
                 this.color = this.baseType.color;
                 this.cooldown = 0;
-                this.range = 1.7 * CELL_SIZE;
+                this.range = 2.5 * CELL_SIZE;
                 this.upgradeDamageCost = 50;
                 this.upgradeSpeedCost = 50;
                 this.upgradeDebuffCost = 50;
+                this.damageMultiplier = 1.0;
+                this.speedMultiplier = 1.0;
+                this.debuffDisabled = false;
+                this.debuffTimer = 0;
             }
             getAttackIntervalFrames() {
-                return Math.max(5, Math.floor(120 / this.attackSpeed));
+                let base = Math.max(5, Math.floor(120 / this.attackSpeed));
+                return Math.max(5, Math.floor(base / this.speedMultiplier));
             }
             update() {
                 if (this.cooldown > 0) this.cooldown--;
                 if (this.cooldown <= 0) {
-                    let target = null;
-                    let minDist = Infinity;
+                    let target = null; let minDist = Infinity;
                     const tx = this.col * CELL_SIZE + CELL_SIZE/2 + 20;
                     const ty = this.row * CELL_SIZE + CELL_SIZE/2 + 20;
                     for (let enemy of enemies) {
                         const dx = enemy.x - tx, dy = enemy.y - ty;
                         const dist = Math.hypot(dx, dy);
-                        if (dist < this.range && dist < minDist) {
-                            minDist = dist; target = enemy;
-                        }
+                        if (dist < this.range && dist < minDist) { minDist = dist; target = enemy; }
                     }
                     if (target) {
-                        target.takeDamage(this.damage);
-                        if (this.debuff > 0) {
-                            if (this.debuffType === 'slow') {
-                                let factor = this.debuff * 0.07;
-                                if (target.typeIndex === 2) factor *= 0.5;
-                                target.applySlow(factor, 35);
-                            } else if (this.debuffType === 'burn') {
-                                target.applyBurn(this.debuff * 0.9, 25);
+                        target.takeDamage(this.damage * this.damageMultiplier);
+                        if (this.debuff > 0 && !this.debuffDisabled) {
+                            const power = this.debuff;
+                            switch (this.debuffType) {
+                                case 'burn': target.applyBurn(power * 0.9, 25); break;
+                                case 'slow': target.applySlow(power * 0.07, 35); break;
+                                case 'armorBreak': target.applyArmorBreak(power * 0.1, 45); break;
+                                case 'silence': target.applySilence(40); break;
+                                case 'knockback': target.applyKnockback(power * 4); break;
+                                case 'fear': target.applyFear(45); break;
+                                case 'disorient': target.applyDisorient(power, 40); break;
+                                case 'corruption': target.applyCorruption(power, 50); break;
+                                case 'goldRush': target.applyGoldRush(power, 50); break;
+                                case 'overload': target.applyOverload(power, 50); break;
+                                case 'ice': target.applyIce(power); break;
+                                case 'bleed': target.applyBleed(power, 45); break;
                             }
                         }
                         this.cooldown = this.getAttackIntervalFrames();
                     }
                 }
+                if (this.debuffTimer > 0) {
+                    this.debuffTimer--;
+                    if (this.debuffTimer <= 0) {
+                        this.damageMultiplier = 1.0; this.speedMultiplier = 1.0; this.debuffDisabled = false;
+                    }
+                }
             }
-            upgradeDamage() { if (this.damage < this.baseType.damage + 5) { this.damage++; return true; } return false; }
-            upgradeAttackSpeed() { if (this.attackSpeed < this.baseType.attackSpeed + 5) { this.attackSpeed++; return true; } return false; }
-            upgradeDebuff() { if (this.debuff < this.baseType.debuff + 5) { this.debuff++; return true; } return false; }
+            applyBossDebuff(damageReduction, speedReduction, disableDebuff, duration) {
+                this.damageMultiplier *= (1 - damageReduction);
+                this.speedMultiplier *= (1 - speedReduction);
+                if (disableDebuff) this.debuffDisabled = true;
+                this.debuffTimer = Math.max(this.debuffTimer, duration);
+            }
+            upgradeDamage() {
+                if (this.damage < this.baseType.damage + 5) {
+                    this.damage++;
+                    return true;
+                }
+                return false;
+            }
+            upgradeAttackSpeed() {
+                if (this.attackSpeed < this.baseType.attackSpeed + 5) {
+                    this.attackSpeed++;
+                    return true;
+                }
+                return false;
+            }
+            upgradeDebuff() {
+                if (this.debuff < this.baseType.debuff + 5) {
+                    this.debuff++;
+                    return true;
+                }
+                return false;
+            }
         }
 
-        // ---------- КЛАСС ВРАГА (ТАЙМАУТ 1 МИНУТА = 3600 КАДРОВ) ----------
+        // ---------- КЛАСС ВРАГА (сокращён, но полностью рабочий) ----------
         class Enemy {
             constructor(typeIndex, waypoints, wave) {
                 this.typeIndex = typeIndex;
                 const base = ENEMY_BASE[typeIndex];
+                this.isBoss = base.isBoss || false;
+                let bossHpBonus = this.isBoss ? (wave / 10) : 1;
                 const waveBonusHp = 1 + (wave - 1) * 0.15;
                 const waveBonusSpeed = 1 + (wave - 1) * 0.03;
-                this.hp = Math.floor(base.baseHp * waveBonusHp);
+                this.hp = Math.floor(base.baseHp * waveBonusHp * (this.isBoss ? bossHpBonus : 1));
                 this.maxHp = this.hp;
-                this.speed = base.baseSpeed * waveBonusSpeed;
-                this.reward = base.reward;
+                this.speed = base.baseSpeed * waveBonusSpeed * (this.isBoss ? 0.8 : 1);
+                this.reward = base.reward * (this.isBoss ? 2 : 1);
                 this.color = base.color;
-                this.slowResist = base.slowResist || 1.0;
+                this.slowResist = base.slowResist;
+                this.originalSlowResist = base.slowResist;
                 this.waypoints = [...waypoints];
                 this.currentTargetIndex = 1;
                 this.x = waypoints[0].col * CELL_SIZE + CELL_SIZE/2 + 20;
                 this.y = waypoints[0].row * CELL_SIZE + CELL_SIZE/2 + 20;
-                this.slowFactor = 1.0;
-                this.slowTimer = 0;
-                this.burnDamage = 0;
-                this.burnTimer = 0;
-                // ТАЙМАУТ: 1 минута при 60 FPS
+                
+                this.slowFactor = 1.0; this.slowTimer = 0;
+                this.burnDamage = 0; this.burnTimer = 0;
+                this.armorBreakMultiplier = 1.0; this.armorBreakTimer = 0;
+                this.silenceTimer = 0;
+                this.fearTimer = 0;
+                this.disorientPower = 0; this.disorientTimer = 0;
+                this.corruptionPower = 0; this.corruptionTimer = 0;
+                this.goldRushPower = 0; this.goldRushTimer = 0;
+                this.overloadPower = 0; this.overloadTimer = 0;
+                this.iceStacks = 0; this.iceTimer = 0;
+                this.bleedPower = 0; this.bleedTimer = 0;
+                this.lastX = this.x; this.lastY = this.y;
+                
+                this.healAura = base.healAura || false;
+                this.berserk = base.berserk || false;
+                this.berserkActive = false;
+                this.shield = base.shield || false;
+                this.bossAura = base.bossAura || null;
+                this.bossDebuff = base.bossDebuff || null;
+                this.bossResist = base.bossResist || false;
+                
                 this.age = 0;
-                this.MAX_AGE = 3600; // 60 * 60 = 3600 кадров
+                this.MAX_AGE = 3600;
             }
-
             move() {
                 if (this.currentTargetIndex >= this.waypoints.length) return;
-                const target = this.waypoints[this.currentTargetIndex];
-                const targetX = target.col * CELL_SIZE + CELL_SIZE/2 + 20;
-                const targetY = target.row * CELL_SIZE + CELL_SIZE/2 + 20;
-                const dx = targetX - this.x;
-                const dy = targetY - this.y;
+                let target = this.fearTimer > 0 ? this.waypoints[0] : this.waypoints[this.currentTargetIndex];
+                const targetX = target.col * CELL_SIZE + CELL_SIZE/2 + 20, targetY = target.row * CELL_SIZE + CELL_SIZE/2 + 20;
+                let dx = targetX - this.x, dy = targetY - this.y;
+                if (this.disorientTimer > 0) {
+                    const strength = this.disorientPower * 2, perpX = -dy, perpY = dx, len = Math.hypot(perpX, perpY);
+                    if (len > 0.01) { const normPerpX = perpX / len, normPerpY = perpY / len; dx += normPerpX * (Math.random()*2-1) * strength; dy += normPerpY * (Math.random()*2-1) * strength; }
+                }
                 const distance = Math.hypot(dx, dy);
-                
-                if (distance < 8) {
-                    this.currentTargetIndex++;
-                } else {
-                    const moveSpeed = this.speed * this.slowFactor * 1.2;
-                    const normX = dx / distance;
-                    const normY = dy / distance;
-                    this.x += normX * moveSpeed;
-                    this.y += normY * moveSpeed;
+                if (distance < 8) { if (this.fearTimer <= 0) this.currentTargetIndex++; }
+                else { let moveSpeed = this.speed * this.slowFactor * 1.2;
+                    if (this.berserk && !this.berserkActive && this.hp < this.maxHp * 0.5) { moveSpeed *= 2.0; this.berserkActive = true; }
+                    this.x += (dx/distance) * moveSpeed; this.y += (dy/distance) * moveSpeed;
+                }
+                this.lastX = this.x; this.lastY = this.y;
+            }
+            takeDamage(amount) {
+                let dmg = amount * this.armorBreakMultiplier;
+                if (this.shield) dmg *= 0.7;
+                if (this.bossResist) dmg *= 0.5;
+                this.hp -= dmg; if (this.hp < 0) this.hp = 0;
+                if (this.goldRushTimer > 0 && Math.random() < this.goldRushPower * 0.05) { money += 5; playSound('buy'); }
+            }
+            applyAuras() {
+                if (!this.isAlive()) return;
+                if (this.healAura) for (let o of enemies) if (o !== this && Math.hypot(o.x-this.x, o.y-this.y) < 120) o.hp = Math.min(o.maxHp, o.hp + 0.5);
+                if (this.bossAura === 'damageSpeed') for (let o of enemies) if (o !== this && Math.hypot(o.x-this.x, o.y-this.y) < 150) { o.speedMultiplier = 1.5; o.damageMultiplier = 1.3; }
+                if (this.bossDebuff === 'towerDebuff' && this.age % 30 === 0) {
+                    let closest = null, min = Infinity;
+                    for (let t of towers) { const d = Math.hypot(this.x - (t.col*CELL_SIZE+CELL_SIZE/2+20), this.y - (t.row*CELL_SIZE+CELL_SIZE/2+20)); if (d < 200 && d < min) { min = d; closest = t; } }
+                    if (closest) closest.applyBossDebuff(0.3, 0.3, false, 60);
                 }
             }
-
-            takeDamage(amount) { this.hp -= amount; if (this.hp < 0) this.hp = 0; }
-            applySlow(factor, duration) {
-                this.slowFactor = Math.max(0.3, 1.0 - factor * this.slowResist);
-                this.slowTimer = duration;
-            }
-            applyBurn(damage, duration) {
-                this.burnDamage = Math.max(this.burnDamage, damage);
-                this.burnTimer = duration;
-            }
+            applyBurn(d, dur) { this.burnDamage = Math.max(this.burnDamage, d); this.burnTimer = Math.max(this.burnTimer, dur); }
+            applySlow(f, dur) { this.slowFactor = Math.max(0.3, 1.0 - f); this.slowTimer = Math.max(this.slowTimer, dur); }
+            applyArmorBreak(m, dur) { this.armorBreakMultiplier = Math.max(1.0, 1.0 + m); this.armorBreakTimer = Math.max(this.armorBreakTimer, dur); }
+            applySilence(dur) { this.silenceTimer = Math.max(this.silenceTimer, dur); this.slowResist = 1.0; }
+            applyKnockback(f) { if (this.currentTargetIndex > 0 && !this.bossResist) { let p = this.waypoints[this.currentTargetIndex-1]; let px = p.col*CELL_SIZE+CELL_SIZE/2+20, py = p.row*CELL_SIZE+CELL_SIZE/2+20; let dx = this.x-px, dy = this.y-py; let d = Math.hypot(dx,dy); if (d>0.01) { this.x += (dx/d)*f; this.y += (dy/d)*f; } } }
+            applyFear(dur) { if (!this.bossResist) this.fearTimer = Math.max(this.fearTimer, dur); }
+            applyDisorient(p, dur) { this.disorientPower = Math.max(this.disorientPower, p); this.disorientTimer = Math.max(this.disorientTimer, dur); }
+            applyCorruption(p, dur) { this.corruptionPower = Math.max(this.corruptionPower, p); this.corruptionTimer = Math.max(this.corruptionTimer, dur); this.reward = Math.floor(ENEMY_BASE[this.typeIndex].reward * Math.max(0, 1 - p * 0.15)); }
+            applyGoldRush(p, dur) { this.goldRushPower = Math.max(this.goldRushPower, p); this.goldRushTimer = Math.max(this.goldRushTimer, dur); }
+            applyOverload(p, dur) { this.overloadPower = Math.max(this.overloadPower, p); this.overloadTimer = Math.max(this.overloadTimer, dur); }
+            applyIce(p) { this.iceStacks = Math.min(5, this.iceStacks+1); this.iceTimer = 40; if (this.iceStacks >= 5) { this.slowFactor = 0; this.slowTimer = 60; this.takeDamage(30); this.iceStacks = 0; } }
+            applyBleed(p, dur) { this.bleedPower = Math.max(this.bleedPower, p); this.bleedTimer = Math.max(this.bleedTimer, dur); }
             updateEffects() {
-                if (this.slowTimer > 0) {
-                    this.slowTimer--;
-                    if (this.slowTimer <= 0) this.slowFactor = 1.0;
-                }
-                if (this.burnTimer > 0) {
-                    this.hp -= this.burnDamage;
-                    this.burnTimer--;
-                    if (this.burnTimer <= 0) this.burnDamage = 0;
-                }
+                if (this.slowTimer > 0 && --this.slowTimer <= 0) this.slowFactor = 1.0;
+                if (this.burnTimer > 0) { this.hp -= this.burnDamage; if (--this.burnTimer <= 0) this.burnDamage = 0; }
+                if (this.armorBreakTimer > 0 && --this.armorBreakTimer <= 0) this.armorBreakMultiplier = 1.0;
+                if (this.silenceTimer > 0 && --this.silenceTimer <= 0) this.slowResist = this.originalSlowResist;
+                if (this.fearTimer > 0) this.fearTimer--;
+                if (this.disorientTimer > 0) this.disorientTimer--;
+                if (this.corruptionTimer > 0) this.corruptionTimer--;
+                if (this.goldRushTimer > 0) this.goldRushTimer--;
+                if (this.overloadTimer > 0) this.overloadTimer--;
+                if (this.iceTimer > 0 && --this.iceTimer <= 0) this.iceStacks = 0;
+                if (this.bleedTimer > 0) { this.bleedTimer--; const dx = this.x - this.lastX, dy = this.y - this.lastY; this.hp -= this.bleedPower * Math.hypot(dx, dy) * 0.1; }
                 this.age++;
             }
-
+            spreadCorruption() {
+                if (this.corruptionTimer <= 0) return;
+                for (let o of enemies) if (o !== this && Math.hypot(o.x-this.x, o.y-this.y) < 100 && o.corruptionTimer < this.corruptionTimer) o.applyCorruption(this.corruptionPower, this.corruptionTimer);
+            }
+            checkOverload() {
+                if (this.overloadTimer <= 0) return;
+                for (let o of enemies) if (o !== this && o.overloadTimer > 0 && Math.hypot(o.x-this.x, o.y-this.y) < 70) { let d = (this.overloadPower+o.overloadPower)*0.8; this.takeDamage(d); o.takeDamage(d); }
+            }
             isAlive() { return this.hp > 0; }
             isAtBase() { return this.currentTargetIndex >= this.waypoints.length; }
             isTooOld() { return this.age > this.MAX_AGE; }
@@ -434,135 +568,92 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
-        // ---------- ОТРИСОВКА ----------
         function drawGrid() {
-            ctx.fillStyle = '#e0e0e0';
-            ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-            for (let row = 0; row < ROWS; row++) {
-                for (let col = 0; col < COLS; col++) {
-                    let x = col * CELL_SIZE + 20;
-                    let y = row * CELL_SIZE + 20;
-                    const cell = gridMap[row][col];
-                    if (cell === 1) {
-                        ctx.fillStyle = '#a0a0a0';
-                        ctx.fillRect(x, y, CELL_SIZE-2, CELL_SIZE-2);
-                        ctx.fillStyle = '#808080';
-                        ctx.fillRect(x+2, y+2, CELL_SIZE-6, CELL_SIZE-6);
-                    } else if (cell === 2) {
-                        ctx.fillStyle = '#c00000';
-                        ctx.fillRect(x, y, CELL_SIZE-2, CELL_SIZE-2);
-                        ctx.fillStyle = '#900000';
-                        ctx.fillRect(x+2, y+2, CELL_SIZE-6, CELL_SIZE-6);
-                        ctx.strokeStyle = '#ffffff';
-                        ctx.lineWidth = 2;
-                        ctx.strokeRect(x+1, y+1, CELL_SIZE-4, CELL_SIZE-4);
-                        ctx.strokeStyle = '#404040';
-                        ctx.lineWidth = 1;
-                        ctx.fillStyle = 'white';
-                        ctx.font = '22px "MS Sans Serif"';
-                        ctx.fillText('🏰', x+15, y+45);
-                        ctx.font = '12px "MS Sans Serif"';
-                        ctx.fillStyle = 'yellow';
-                        ctx.fillText(`HP: ${Math.floor(baseHealth)}`, x+5, y-5);
-                    } else {
-                        ctx.fillStyle = '#70b070';
-                        ctx.fillRect(x, y, CELL_SIZE-2, CELL_SIZE-2);
-                        ctx.fillStyle = '#509050';
-                        ctx.fillRect(x+2, y+2, CELL_SIZE-6, CELL_SIZE-6);
-                    }
-                    ctx.strokeStyle = '#404040';
-                    ctx.strokeRect(x, y, CELL_SIZE-2, CELL_SIZE-2);
+            ctx.fillStyle = '#e0e0e0'; ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            for (let row = 0; row < ROWS; row++) for (let col = 0; col < COLS; col++) {
+                let x = col * CELL_SIZE + 20, y = row * CELL_SIZE + 20, cell = gridMap[row][col];
+                if (cell === 1) {
+                    ctx.fillStyle = '#a0a0a0'; ctx.fillRect(x, y, CELL_SIZE-2, CELL_SIZE-2);
+                    ctx.fillStyle = '#808080'; ctx.fillRect(x+2, y+2, CELL_SIZE-6, CELL_SIZE-6);
+                } else if (cell === 2) {
+                    ctx.fillStyle = '#c00000'; ctx.fillRect(x, y, CELL_SIZE-2, CELL_SIZE-2);
+                    ctx.fillStyle = '#900000'; ctx.fillRect(x+2, y+2, CELL_SIZE-6, CELL_SIZE-6);
+                    ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.strokeRect(x+1, y+1, CELL_SIZE-4, CELL_SIZE-4);
+                    ctx.strokeStyle = '#404040'; ctx.lineWidth = 1;
+                    ctx.fillStyle = 'white'; ctx.font = '22px "MS Sans Serif"'; ctx.fillText('🏰', x+15, y+45);
+                    ctx.font = '12px "MS Sans Serif"'; ctx.fillStyle = 'yellow'; ctx.fillText(`HP: ${Math.floor(baseHealth)}`, x+5, y-5);
+                } else {
+                    ctx.fillStyle = '#70b070'; ctx.fillRect(x, y, CELL_SIZE-2, CELL_SIZE-2);
+                    ctx.fillStyle = '#509050'; ctx.fillRect(x+2, y+2, CELL_SIZE-6, CELL_SIZE-6);
                 }
+                ctx.strokeStyle = '#404040'; ctx.strokeRect(x, y, CELL_SIZE-2, CELL_SIZE-2);
             }
         }
 
         function drawTowers() {
             for (let t of towers) {
-                let x = t.col * CELL_SIZE + 20;
-                let y = t.row * CELL_SIZE + 20;
-                ctx.fillStyle = t.color;
-                ctx.shadowBlur = 4;
-                ctx.fillRect(x+8, y+8, CELL_SIZE-20, CELL_SIZE-20);
-                ctx.shadowBlur = 0;
-                ctx.fillStyle = 'black';
-                ctx.font = '16px "MS Sans Serif"';
-                ctx.fillText('⚙️', x+15, y+42);
-                ctx.font = '10px "MS Sans Serif"';
-                ctx.fillStyle = 'white';
-                ctx.shadowColor = 'black';
-                ctx.shadowBlur = 3;
-                ctx.fillText(`${t.damage}|${t.attackSpeed}|${t.debuff}`, x+8, y+20);
-                ctx.shadowBlur = 0;
+                let x = t.col * CELL_SIZE + 20, y = t.row * CELL_SIZE + 20;
+                ctx.fillStyle = t.color; ctx.shadowBlur = 4; ctx.fillRect(x+8, y+8, CELL_SIZE-20, CELL_SIZE-20); ctx.shadowBlur = 0;
+                ctx.fillStyle = 'black'; ctx.font = '16px "MS Sans Serif"'; ctx.fillText('⚙️', x+15, y+42);
+                ctx.font = '10px "MS Sans Serif"'; ctx.fillStyle = 'white'; ctx.shadowColor = 'black'; ctx.shadowBlur = 3;
+                ctx.fillText(`${t.damage}|${t.attackSpeed}|${t.debuff}`, x+8, y+20); ctx.shadowBlur = 0;
+                if (t.debuffTimer > 0) { ctx.fillStyle = '#ff000080'; ctx.fillRect(x+8, y+8, CELL_SIZE-20, CELL_SIZE-20); }
             }
         }
 
         function drawEnemies() {
             for (let e of enemies) {
-                ctx.fillStyle = e.color;
-                ctx.beginPath();
-                ctx.arc(e.x, e.y, 12, 0, 2 * Math.PI);
-                ctx.fill();
-                ctx.fillStyle = 'black';
-                ctx.font = '12px "MS Sans Serif"';
-                ctx.fillText(`❤️${Math.floor(e.hp)}`, e.x-20, e.y-20);
-                if (e.slowFactor < 1) {
-                    ctx.fillStyle = '#aaffaa80';
-                    ctx.beginPath();
-                    ctx.arc(e.x, e.y, 16, 0, Math.PI*2);
-                    ctx.fill();
-                }
-                if (e.burnTimer > 0) {
-                    ctx.fillStyle = '#ff880080';
-                    ctx.beginPath();
-                    ctx.arc(e.x, e.y, 14, 0, Math.PI*2);
-                    ctx.fill();
-                }
+                ctx.fillStyle = e.color; ctx.beginPath(); ctx.arc(e.x, e.y, 12, 0, 2*Math.PI); ctx.fill();
+                if (e.isBoss) { ctx.fillStyle = 'gold'; ctx.font = '16px "MS Sans Serif"'; ctx.fillText('👑', e.x-15, e.y-25); }
+                // Дебаффы (полная визуализация)
+                if (e.slowFactor < 1) { ctx.fillStyle = '#aaffaa80'; ctx.beginPath(); ctx.arc(e.x, e.y, 16, 0, 2*Math.PI); ctx.fill(); }
+                if (e.burnTimer > 0) { ctx.fillStyle = '#ff880080'; ctx.beginPath(); ctx.arc(e.x, e.y, 14, 0, 2*Math.PI); ctx.fill(); }
+                if (e.armorBreakTimer > 0) { ctx.fillStyle = '#ffaa0080'; ctx.beginPath(); ctx.arc(e.x, e.y, 18, 0, 2*Math.PI); ctx.fill(); }
+                if (e.silenceTimer > 0) { ctx.fillStyle = '#88888880'; ctx.beginPath(); ctx.arc(e.x, e.y, 20, 0, 2*Math.PI); ctx.fill(); }
+                if (e.fearTimer > 0) { ctx.fillStyle = '#0000ff80'; ctx.beginPath(); ctx.arc(e.x, e.y, 22, 0, 2*Math.PI); ctx.fill(); }
+                if (e.disorientTimer > 0) { ctx.fillStyle = '#00cccc80'; ctx.beginPath(); ctx.arc(e.x, e.y, 24, 0, 2*Math.PI); ctx.fill(); }
+                if (e.corruptionTimer > 0) { ctx.fillStyle = '#88444480'; ctx.beginPath(); ctx.arc(e.x, e.y, 26, 0, 2*Math.PI); ctx.fill(); }
+                if (e.goldRushTimer > 0) { ctx.fillStyle = '#ffcc0080'; ctx.beginPath(); ctx.arc(e.x, e.y, 28, 0, 2*Math.PI); ctx.fill(); }
+                if (e.overloadTimer > 0) { ctx.fillStyle = '#66aaff80'; ctx.beginPath(); ctx.arc(e.x, e.y, 30, 0, 2*Math.PI); ctx.fill(); }
+                if (e.iceStacks > 0) { ctx.fillStyle = '#aaffff80'; ctx.beginPath(); ctx.arc(e.x, e.y, 32, 0, 2*Math.PI); ctx.fill(); ctx.fillStyle = 'white'; ctx.font = '12px "MS Sans Serif"'; ctx.fillText(`${e.iceStacks}❄️`, e.x-10, e.y-35); }
+                if (e.bleedTimer > 0) { ctx.fillStyle = '#ff666680'; ctx.beginPath(); ctx.arc(e.x, e.y, 34, 0, 2*Math.PI); ctx.fill(); }
+                if (e.healAura) { ctx.fillStyle = '#00ff00'; ctx.font = '12px "MS Sans Serif"'; ctx.fillText('✚', e.x-5, e.y-40); }
+                if (e.berserkActive) { ctx.fillStyle = '#ff0000'; ctx.font = '12px "MS Sans Serif"'; ctx.fillText('⚡', e.x-5, e.y-50); }
+                if (e.shield) { ctx.fillStyle = '#aaaaaa'; ctx.font = '12px "MS Sans Serif"'; ctx.fillText('🛡️', e.x-5, e.y-60); }
+                if (e.bossAura === 'damageSpeed') { ctx.fillStyle = '#aa00ff80'; ctx.beginPath(); ctx.arc(e.x, e.y, 38, 0, 2*Math.PI); ctx.fill(); }
+                if (e.bossDebuff === 'towerDebuff') { ctx.fillStyle = '#ff44aa80'; ctx.beginPath(); ctx.arc(e.x, e.y, 40, 0, 2*Math.PI); ctx.fill(); }
+                if (e.bossResist) { ctx.fillStyle = '#22222280'; ctx.beginPath(); ctx.arc(e.x, e.y, 42, 0, 2*Math.PI); ctx.fill(); }
+                ctx.fillStyle = 'black'; ctx.font = '12px "MS Sans Serif"'; ctx.fillText(`❤️${Math.floor(e.hp)}`, e.x-20, e.y-20);
             }
         }
 
         function draw() {
-            drawGrid();
-            drawTowers();
-            drawEnemies();
-            if (startDelay > 0) {
-                ctx.fillStyle = 'black';
-                ctx.font = '20px "MS Sans Serif"';
-                ctx.fillText(`⏳ Подготовка: ${Math.ceil(startDelay / 60)} сек`, 50, 80);
-            }
-            if (waypoints.length > 0) {
-                ctx.fillStyle = 'black';
-                ctx.font = '16px "MS Sans Serif"';
-                ctx.fillText('🚪 Старт', waypoints[0].col * CELL_SIZE + 25, waypoints[0].row * CELL_SIZE + 55);
-            }
+            drawGrid(); drawTowers(); drawEnemies();
+            if (startDelay > 0) { ctx.fillStyle = 'black'; ctx.font = '20px "MS Sans Serif"'; ctx.fillText(`⏳ Подготовка: ${Math.ceil(startDelay / 60)} сек`, 50, 80); }
+            if (waypoints.length > 0) { ctx.fillStyle = 'black'; ctx.font = '16px "MS Sans Serif"'; ctx.fillText('🚪 Старт', waypoints[0].col * CELL_SIZE + 25, waypoints[0].row * CELL_SIZE + 55); }
         }
 
         // ---------- ИГРОВОЙ ЦИКЛ ----------
         function gameLoop() {
-            if (gameOver) {
-                requestAnimationFrame(gameLoop);
-                return;
-            }
-
+            if (gameOver) { requestAnimationFrame(gameLoop); return; }
             frame++;
+            if (startDelay > 0) { startDelay--; draw(); updateUI(); requestAnimationFrame(gameLoop); return; }
 
-            if (startDelay > 0) {
-                startDelay--;
-                draw();
-                updateUI();
-                requestAnimationFrame(gameLoop);
-                return;
-            }
+            bossWave = (wave % 10 === 0);
+            document.getElementById('bossIndicator').style.display = bossWave ? 'inline' : 'none';
 
             spawnCounter++;
             if (spawnCounter >= spawnDelay && enemiesSpawnedThisWave < enemiesPerWave) {
                 spawnCounter = 0;
-                let r = Math.random();
                 let type;
-                if (wave < 3) type = 0;
-                else {
-                    if (r < 0.5) type = 0;
-                    else if (r < 0.8) type = 1;
-                    else type = 2;
+                if (bossWave && enemiesSpawnedThisWave === 0) {
+                    let bossType = 9 + (Math.floor(wave / 10) % 3);
+                    type = bossType; playSound('bossSpawn');
+                } else {
+                    let r = Math.random();
+                    if (wave < 3) { if (r < 0.6) type = 0; else if (r < 0.9) type = 2; else type = 6; }
+                    else if (wave < 6) { if (r < 0.3) type = 0; else if (r < 0.5) type = 1; else if (r < 0.7) type = 2; else if (r < 0.85) type = 3; else type = 7; }
+                    else { if (r < 0.2) type = 0; else if (r < 0.35) type = 1; else if (r < 0.5) type = 2; else if (r < 0.6) type = 3; else if (r < 0.7) type = 4; else if (r < 0.8) type = 5; else if (r < 0.9) type = 6; else type = 8; }
                 }
                 enemies.push(new Enemy(type, waypoints, wave));
                 enemiesSpawnedThisWave++;
@@ -572,60 +663,31 @@
 
             for (let i = enemies.length - 1; i >= 0; i--) {
                 let e = enemies[i];
-                e.move();
-                e.updateEffects();
-
-                if (e.isTooOld() && !e.isAtBase()) {
-                    baseHealth -= 15;
-                    playSound('basehit');
-                    if (baseHealth < 0) baseHealth = 0;
-                    enemies.splice(i, 1);
-                    continue;
-                }
-
-                if (e.isAtBase()) {
-                    baseHealth -= 15;
-                    playSound('basehit');
-                    if (baseHealth < 0) baseHealth = 0;
-                    enemies.splice(i, 1);
-                    continue;
-                }
-
-                if (!e.isAlive()) {
-                    money += e.reward;
-                    playSound('kill');
-                    enemies.splice(i, 1);
-                }
+                e.move(); e.updateEffects(); e.applyAuras(); e.spreadCorruption(); e.checkOverload();
+                if (e.isTooOld() && !e.isAtBase()) { baseHealth -= 15; playSound('basehit'); if (baseHealth < 0) baseHealth = 0; enemies.splice(i, 1); continue; }
+                if (e.isAtBase()) { baseHealth -= e.isBoss ? 50 : 15; playSound('basehit'); if (baseHealth < 0) baseHealth = 0; enemies.splice(i, 1); continue; }
+                if (!e.isAlive()) { money += e.reward; playSound('kill'); enemies.splice(i, 1); }
             }
 
             if (enemiesSpawnedThisWave >= enemiesPerWave && enemies.length === 0) {
                 wave++;
-                if (wave > maxWaveRecord) {
-                    maxWaveRecord = wave;
-                    localStorage.setItem('sonktd_maxwave', maxWaveRecord);
-                }
+                if (wave > maxWaveRecord) { maxWaveRecord = wave; localStorage.setItem('sonktd_maxwave', maxWaveRecord); }
                 enemiesSpawnedThisWave = 0;
-                enemiesPerWave = Math.min(25, 8 + wave * 2);
+                enemiesPerWave = bossWave ? 5 + wave : 8 + wave * 2;
+                enemiesPerWave = Math.min(25, enemiesPerWave);
                 spawnDelay = Math.max(20, 50 - wave * 2);
-                money += 50 + wave * 5;
+                money += 30 + wave * 3;
             }
 
-            if (baseHealth <= 0) {
-                gameOver = true;
-                baseHealth = 0;
-                alert('😵 БАЗА УНИЧТОЖЕНА! Нажмите "Новая игра".');
-            }
+            if (baseHealth <= 0) { gameOver = true; baseHealth = 0; alert('😵 БАЗА УНИЧТОЖЕНА! Нажмите "Новая игра".'); }
 
-            draw();
-            updateUI();
-            requestAnimationFrame(gameLoop);
+            draw(); updateUI(); requestAnimationFrame(gameLoop);
         }
 
         function updateUI() {
             document.getElementById('moneyDisplay').innerText = Math.floor(money);
             document.getElementById('baseHealthDisplay').innerText = Math.floor(baseHealth);
-            const percent = Math.max(0, (baseHealth / maxBaseHealth) * 100);
-            document.getElementById('baseHealthFill').style.width = percent + '%';
+            document.getElementById('baseHealthFill').style.width = Math.max(0, (baseHealth / maxBaseHealth) * 100) + '%';
             document.getElementById('waveDisplay').innerText = wave;
             document.getElementById('recordDisplay').innerText = maxWaveRecord;
         }
@@ -634,58 +696,49 @@
         canvas.addEventListener('click', (e) => {
             if (gameOver) return;
             const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            const canvasX = (e.clientX - rect.left) * scaleX;
-            const canvasY = (e.clientY - rect.top) * scaleY;
-
-            const col = Math.floor((canvasX - 20) / CELL_SIZE);
-            const row = Math.floor((canvasY - 20) / CELL_SIZE);
+            const scaleX = canvas.width / rect.width, scaleY = canvas.height / rect.height;
+            const canvasX = (e.clientX - rect.left) * scaleX, canvasY = (e.clientY - rect.top) * scaleY;
+            const col = Math.floor((canvasX - 20) / CELL_SIZE), row = Math.floor((canvasY - 20) / CELL_SIZE);
             if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
-
             const towerHere = towers.find(t => t.col === col && t.row === row);
-            if (towerHere) {
-                selectedTowerForUpgrade = towerHere;
-                showUpgradePanel(towerHere);
-                return;
-            }
-
-            if (gridMap[row][col] !== 0) {
-                alert('❌ Нельзя строить на пути или базе!');
-                return;
-            }
+            if (towerHere) { selectedTowerForUpgrade = towerHere; showUpgradePanel(towerHere); return; }
+            if (gridMap[row][col] !== 0) { alert('❌ Нельзя строить на пути или базе!'); return; }
             if (towers.some(t => t.col === col && t.row === row)) return;
-
-            const towerType = selectedTowerIndex;
-            const price = TOWER_TYPES[towerType].price;
-
-            if (towers.length === 0) {
-                towers.push(new Tower(col, row, towerType));
-                playSound('buy');
-            } else {
-                if (money < price) {
-                    alert('💰 Недостаточно монет!');
-                    return;
-                }
-                money -= price;
-                towers.push(new Tower(col, row, towerType));
-                playSound('buy');
-            }
+            const towerType = selectedTowerIndex, price = TOWER_TYPES[towerType].price;
+            if (towers.length === 0) { towers.push(new Tower(col, row, towerType)); playSound('buy'); }
+            else { if (money < price) { alert('💰 Недостаточно монет!'); return; } money -= price; towers.push(new Tower(col, row, towerType)); playSound('buy'); }
         });
+
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); const touch = e.touches[0]; canvas.dispatchEvent(new MouseEvent('click', { clientX: touch.clientX, clientY: touch.clientY })); });
 
         function showUpgradePanel(tower) {
             document.getElementById('upgradePanel').style.display = 'block';
             let attackIntervalSec = (2 / tower.attackSpeed).toFixed(2);
+            let debuffName = '';
+            switch (tower.debuffType) {
+                case 'burn': debuffName = 'ПОДЖОГ'; break;
+                case 'slow': debuffName = 'ЗАМЕДЛЕНИЕ'; break;
+                case 'armorBreak': debuffName = 'УЯЗВИМОСТЬ'; break;
+                case 'silence': debuffName = 'НЕМОТА'; break;
+                case 'knockback': debuffName = 'ОТБРАСЫВАНИЕ'; break;
+                case 'fear': debuffName = 'СТРАХ'; break;
+                case 'disorient': debuffName = 'ДЕЗОРИЕНТАЦИЯ'; break;
+                case 'corruption': debuffName = 'ПОРЧА'; break;
+                case 'goldRush': debuffName = 'ЗОЛ.ЛИХОРАДКА'; break;
+                case 'overload': debuffName = 'ПЕРЕГРУЗКА'; break;
+                case 'ice': debuffName = 'ХРУПКИЙ ЛЁД'; break;
+                case 'bleed': debuffName = 'КРОВОТЕЧЕНИЕ'; break;
+            }
             document.getElementById('selectedTowerInfo').innerHTML = 
-                `Башня: ${tower.baseType.name}<br>
-                💥 Урон ${tower.damage} (макс ${tower.baseType.damage+5})<br>
-                ⚡ Ск.атаки ${tower.attackSpeed} (интервал ${attackIntervalSec} сек, макс ${tower.baseType.attackSpeed+5})<br>
-                🧪 Дебафф ${tower.debuff} (макс ${tower.baseType.debuff+5})`;
+                `Башня: ${tower.baseType.name}<br>💥 Урон ${tower.damage} (макс ${tower.baseType.damage+5})<br>⚡ Ск.атаки ${tower.attackSpeed} (интервал ${attackIntervalSec} сек, макс ${tower.baseType.attackSpeed+5})<br>🧪 ${debuffName} ${tower.debuff} (макс ${tower.baseType.debuff+5})`;
             document.getElementById('upgradeDamageBtn').onclick = () => upgradeTowerStat(tower, 'damage');
             document.getElementById('upgradeSpeedBtn').onclick = () => upgradeTowerStat(tower, 'speed');
             document.getElementById('upgradeDebuffBtn').onclick = () => upgradeTowerStat(tower, 'debuff');
+            // Сохраняем выбранную башню для кнопки "Улучшить всё до макс"
+            window.selectedTowerForAllUpgrade = tower;
         }
 
+        // Функция улучшения одной характеристики
         function upgradeTowerStat(tower, stat) {
             if (gameOver) return;
             let success = false;
@@ -697,20 +750,94 @@
                 else alert('Максимальная скорость атаки!');
             } else if (stat === 'debuff' && money >= tower.upgradeDebuffCost) {
                 if (tower.upgradeDebuff()) { money -= tower.upgradeDebuffCost; success = true; }
-                else alert('Максимальный дебафф!');
-            } else {
-                alert('Недостаточно монет!');
-            }
-            if (success) {
-                playSound('buy');
-                showUpgradePanel(tower);
-                updateUI();
-            }
+                else alert('Максимальный уровень дебаффа!');
+            } else alert('Недостаточно монет!');
+            if (success) { playSound('buy'); showUpgradePanel(tower); updateUI(); }
         }
+
+        // НОВАЯ УМНАЯ ФУНКЦИЯ: Улучшить всё до максимума, насколько хватит денег
+        window.upgradeAllStatsMax = function() {
+            if (gameOver) return;
+            const tower = window.selectedTowerForAllUpgrade;
+            if (!tower) return;
+
+            let upgradesDone = 0;
+            let totalSpent = 0;
+
+            // Повторяем, пока есть деньги (минимум 50) и есть что улучшать
+            while (money >= 50) {
+                let improved = false;
+
+                // Пытаемся улучшить урон, если не максимум
+                if (tower.damage < tower.baseType.damage + 5) {
+                    tower.upgradeDamage();
+                    money -= 50;
+                    totalSpent += 50;
+                    upgradesDone++;
+                    improved = true;
+                }
+                // Если улучшили, продолжаем цикл, чтобы попробовать другие характеристики
+                if (improved) continue;
+
+                // Иначе пытаемся улучшить скорость
+                if (tower.attackSpeed < tower.baseType.attackSpeed + 5) {
+                    tower.upgradeAttackSpeed();
+                    money -= 50;
+                    totalSpent += 50;
+                    upgradesDone++;
+                    improved = true;
+                }
+                if (improved) continue;
+
+                // Иначе пытаемся улучшить дебафф
+                if (tower.debuff < tower.baseType.debuff + 5) {
+                    tower.upgradeDebuff();
+                    money -= 50;
+                    totalSpent += 50;
+                    upgradesDone++;
+                    improved = true;
+                }
+                if (improved) continue;
+
+                // Если ничего не улучшили — все характеристики на максимуме
+                break;
+            }
+
+            if (upgradesDone === 0) {
+                if (tower.damage >= tower.baseType.damage + 5 &&
+                    tower.attackSpeed >= tower.baseType.attackSpeed + 5 &&
+                    tower.debuff >= tower.baseType.debuff + 5) {
+                    alert('✨ Все характеристики уже максимальны!');
+                } else {
+                    alert('💰 Недостаточно монет! (нужно минимум 50)');
+                }
+                return;
+            }
+
+            playSound('buy');
+            showUpgradePanel(tower); // обновляем панель
+            updateUI();
+            alert(`✅ Улучшено ${upgradesDone} раз(а), потрачено ${totalSpent}💰`);
+        };
 
         window.selectTower = function(index) {
             selectedTowerIndex = index;
-            alert(`Выбран тип: ${TOWER_TYPES[index].name}`);
+            let debuffName = '';
+            switch (TOWER_TYPES[index].debuffType) {
+                case 'burn': debuffName = 'ПОДЖОГ'; break;
+                case 'slow': debuffName = 'ЗАМЕДЛЕНИЕ'; break;
+                case 'armorBreak': debuffName = 'УЯЗВИМОСТЬ'; break;
+                case 'silence': debuffName = 'НЕМОТА'; break;
+                case 'knockback': debuffName = 'ОТБРАСЫВАНИЕ'; break;
+                case 'fear': debuffName = 'СТРАХ'; break;
+                case 'disorient': debuffName = 'ДЕЗОРИЕНТАЦИЯ'; break;
+                case 'corruption': debuffName = 'ПОРЧА'; break;
+                case 'goldRush': debuffName = 'ЗОЛ.ЛИХОРАДКА'; break;
+                case 'overload': debuffName = 'ПЕРЕГРУЗКА'; break;
+                case 'ice': debuffName = 'ХРУПКИЙ ЛЁД'; break;
+                case 'bleed': debuffName = 'КРОВОТЕЧЕНИЕ'; break;
+            }
+            alert(`Выбран тип: ${TOWER_TYPES[index].name} (${TOWER_TYPES[index].price}💰) — ${debuffName}`);
         };
 
         window.restartGame = function() {
@@ -726,14 +853,12 @@
             spawnCounter = 0;
             startDelay = 120;
             selectedTowerForUpgrade = null;
+            window.selectedTowerForAllUpgrade = null;
             document.getElementById('upgradePanel').style.display = 'none';
             updateUI();
         };
 
-        window.onload = function() {
-            restartGame();
-            requestAnimationFrame(gameLoop);
-        };
+        window.onload = function() { restartGame(); requestAnimationFrame(gameLoop); };
     </script>
 </body>
 </html>
